@@ -1,11 +1,22 @@
 import csv
+import tkinter as tk
+from tkinter import filedialog
+
+def seleziona_file():
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename(
+        title="Seleziona il file CSV",
+        filetypes=[("File CSV", "*.csv"), ("Tutti i file", "*.*")]
+    )
+    return file_path
 
 def estrai_dati(file_path):
     risultati = []
     with open(file_path, 'r', encoding='utf-8') as file:
         reader = csv.reader(file, delimiter=';')
         
-        # Leggi l'header e trova gli indici delle colonne richieste
+        # Leggi l'header e trova gli indici
         headers = next(reader)
         try:
             idx_cognome = headers.index("Cognome")
@@ -13,17 +24,17 @@ def estrai_dati(file_path):
             idx_targa = headers.index("Targa")
             idx_cellulare = headers.index("Cellulare")
         except ValueError as e:
-            print(f"Colonna non trovata: {e}")
+            print(f"Errore nell'intestazione: {e}")
             return []
 
         for row in reader:
             if len(row) < max(idx_cognome, idx_nome, idx_targa, idx_cellulare):
-                continue  # Salva righe malformate
+                continue
 
             cognome = row[idx_cognome].strip()
             nome = row[idx_nome].strip()
             targa = row[idx_targa].strip()
-            cellulare = row[idx_cellulare].strip() if row[idx_cellulare].strip() else "N/D"
+            cellulare = row[idx_cellulare].strip() or "N/D"
 
             risultati.append({
                 'Cognome': cognome,
@@ -34,9 +45,19 @@ def estrai_dati(file_path):
 
     return risultati
 
-# Esempio di utilizzo
-dati = estrai_dati('richiami dal 01-01-2023 al 31-12-2023.Csv')
-
-# Stampa i risultati
-for item in dati:
-    print(f"{item['Nome']} {item['Cognome']} - Targa: {item['Targa']} - Cell: {item['Cellulare']}")
+# Esecuzione principale
+if __name__ == "__main__":
+    print("=== CSV Reader ===")
+    percorso = seleziona_file()
+    
+    if not percorso:
+        print("Nessun file selezionato. Uscita...")
+    else:
+        print(f"\nFile selezionato: {percorso}")
+        dati = estrai_dati(percorso)
+        
+        print("\nRisultati trovati:")
+        for i, item in enumerate(dati, 1):
+            print(f"{i}. {item['Nome']} {item['Cognome']} - {item['Targa']} - Tel: {item['Cellulare']}")
+        
+        print(f"\nTotale record: {len(dati)}")
