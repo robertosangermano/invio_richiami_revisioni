@@ -1,0 +1,42 @@
+import csv
+
+def estrai_dati(file_path):
+    risultati = []
+    with open(file_path, 'r', encoding='utf-8') as file:
+        reader = csv.reader(file, delimiter=';')
+        
+        # Leggi l'header e trova gli indici delle colonne richieste
+        headers = next(reader)
+        try:
+            idx_cognome = headers.index("Cognome")
+            idx_nome = headers.index("Nome")
+            idx_targa = headers.index("Targa")
+            idx_cellulare = headers.index("Cellulare")
+        except ValueError as e:
+            print(f"Colonna non trovata: {e}")
+            return []
+
+        for row in reader:
+            if len(row) < max(idx_cognome, idx_nome, idx_targa, idx_cellulare):
+                continue  # Salva righe malformate
+
+            cognome = row[idx_cognome].strip()
+            nome = row[idx_nome].strip()
+            targa = row[idx_targa].strip()
+            cellulare = row[idx_cellulare].strip() if row[idx_cellulare].strip() else "N/D"
+
+            risultati.append({
+                'Cognome': cognome,
+                'Nome': nome,
+                'Targa': targa,
+                'Cellulare': cellulare
+            })
+
+    return risultati
+
+# Esempio di utilizzo
+dati = estrai_dati('richiami dal 01-01-2023 al 31-12-2023.Csv')
+
+# Stampa i risultati
+for item in dati:
+    print(f"{item['Nome']} {item['Cognome']} - Targa: {item['Targa']} - Cell: {item['Cellulare']}")
